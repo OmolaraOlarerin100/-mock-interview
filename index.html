@@ -653,9 +653,18 @@ async function submitAnswer(){
   try{
     const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:800,system:`You are a strict but fair interview coach. Score the candidate's answer. Return ONLY valid JSON, no markdown: {"clarity":85,"confidence":70,"relevance":90,"feedback":"2-3 sentence feedback"}. Scores are integers 0-100.`,messages:[{role:'user',content:`Job Description:\n${state.jd}${idealCtx}\n\nQuestion: ${q}\n\nCandidate's answer: ${ans}`}]})});
     const data=await res.json();
+    console.log('Score API raw response:', JSON.stringify(data));
+    if(data.error) throw new Error(`API error: ${data.error.type} — ${data.error.message}`);
     const txt=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
-    state.scores.push(JSON.parse(txt));
-  }catch(e){state.scores.push({clarity:0,confidence:0,relevance:0,feedback:'Could not score this answer.'});}
+    console.log('Score text to parse:', txt);
+    // Try to extract JSON even if there's extra text around it
+    const jsonMatch = txt.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('No JSON object found in response: '+txt);
+    state.scores.push(JSON.parse(jsonMatch[0]));
+  }catch(e){
+    console.error('Scoring error:', e.message);
+    state.scores.push({clarity:0,confidence:0,relevance:0,feedback:`Scoring failed: ${e.message}`});
+  }
 
   state.currentQ++;
   if(state.currentQ<state.questions.length){show('interview');loadQuestion();}
