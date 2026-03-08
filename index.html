@@ -302,6 +302,7 @@ textarea:focus{border-color:#6c8cff}
 <script>
 const API = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-20250514";
+const API_KEY = "YOUR_API_KEY_HERE";
 const STORAGE_KEY = "mockinterview_v3";
 
 let state = {
@@ -420,7 +421,7 @@ async function startInterview(){
 }
 async function generateQuestions(){
   try{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:1000,system:`Generate exactly ${state.qCount} interview questions from the job description. Return ONLY a JSON array of strings.`,messages:[{role:'user',content:`Job Description:\n${state.jd}`}]})});
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:MODEL,max_tokens:1000,system:`Generate exactly ${state.qCount} interview questions from the job description. Return ONLY a JSON array of strings.`,messages:[{role:'user',content:`Job Description:\n${state.jd}`}]})});
     const data=await res.json();
     const txt=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
     state.questions=JSON.parse(txt);
@@ -651,7 +652,7 @@ async function submitAnswer(){
   const ideal=state.idealAnswers[state.currentQ];
   const idealCtx=ideal?`\nIdeal answer:\n${ideal}`:'';
   try{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:800,system:`You are a strict but fair interview coach. Score the candidate's answer. Return ONLY valid JSON, no markdown: {"clarity":85,"confidence":70,"relevance":90,"feedback":"2-3 sentence feedback"}. Scores are integers 0-100.`,messages:[{role:'user',content:`Job Description:\n${state.jd}${idealCtx}\n\nQuestion: ${q}\n\nCandidate's answer: ${ans}`}]})});
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:MODEL,max_tokens:800,system:`You are a strict but fair interview coach. Score the candidate's answer. Return ONLY valid JSON, no markdown: {"clarity":85,"confidence":70,"relevance":90,"feedback":"2-3 sentence feedback"}. Scores are integers 0-100.`,messages:[{role:'user',content:`Job Description:\n${state.jd}${idealCtx}\n\nQuestion: ${q}\n\nCandidate's answer: ${ans}`}]})});
     const data=await res.json();
     console.log('Score API raw response:', JSON.stringify(data));
     if(data.error) throw new Error(`API error: ${data.error.type} — ${data.error.message}`);
