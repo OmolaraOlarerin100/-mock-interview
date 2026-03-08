@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mock Interview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0a0e1a;color:#e0e6f0;min-height:100vh}
+.screen{display:none;min-height:100vh;padding:24px}
+.screen.active{display:flex;flex-direction:column}
+.top-nav{display:flex;gap:4px;background:#111827;border:1px solid #1f2d45;border-radius:12px;padding:4px;margin-bottom:18px}
+.nav-btn{flex:1;padding:8px;border:none;border-radius:9px;background:transparent;color:#6b7a99;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.18s}
+.nav-btn.active{background:#1f2d45;color:#e0e6f0}
+.nav-btn .badge{display:inline-block;background:#6c8cff;color:#fff;border-radius:10px;font-size:0.65rem;padding:1px 6px;margin-left:5px;vertical-align:middle}
+#setup{max-width:800px;margin:0 auto;width:100%;gap:16px}
+.logo{text-align:center;padding:8px 0 2px}
+.logo h1{font-size:1.7rem;font-weight:700;background:linear-gradient(135deg,#6c8cff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo p{color:#6b7a99;font-size:0.85rem;margin-top:3px}
+.card{background:#111827;border:1px solid #1f2d45;border-radius:14px;padding:16px}
+.card h3{font-size:0.78rem;font-weight:600;color:#6c8cff;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:11px}
+textarea{width:100%;background:#0d1526;border:1px solid #1f2d45;border-radius:8px;color:#e0e6f0;padding:10px 12px;font-size:0.86rem;resize:vertical;outline:none;font-family:inherit}
+textarea:focus{border-color:#6c8cff}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row .card{flex:1;min-width:190px}
+.chip-group{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.chip{padding:5px 13px;border-radius:20px;border:1px solid #1f2d45;background:#0d1526;color:#a0aec0;cursor:pointer;font-size:0.79rem;transition:all 0.16s}
+.chip.selected{background:#6c8cff22;border-color:#6c8cff;color:#6c8cff;font-weight:600}
+.q-tab-row{display:flex;gap:8px;margin-bottom:13px}
+.q-tab{padding:6px 16px;border-radius:20px;border:1px solid #1f2d45;background:#0d1526;color:#a0aec0;cursor:pointer;font-size:0.79rem;transition:all 0.16s}
+.q-tab.active{background:#a78bfa22;border-color:#a78bfa;color:#a78bfa;font-weight:600}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.toggle{position:relative;width:38px;height:21px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#1f2d45;border-radius:21px;transition:0.25s}
+.toggle-slider:before{content:'';position:absolute;width:15px;height:15px;left:3px;top:3px;background:#6b7a99;border-radius:50%;transition:0.25s}
+.toggle input:checked+.toggle-slider{background:#6c8cff33;border:1px solid #6c8cff}
+.toggle input:checked+.toggle-slider:before{transform:translateX(17px);background:#6c8cff}
+.toggle-label{font-size:0.82rem;color:#a0aec0}
+.qa-list{display:flex;flex-direction:column;gap:11px}
+.qa-pair{background:#0d1526;border:1px solid #1f2d45;border-radius:12px;padding:13px}
+.qa-pair-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.qa-pair-header span{font-size:0.73rem;color:#6c8cff;font-weight:600;text-transform:uppercase;letter-spacing:0.07em}
+.btn-remove{background:none;border:none;color:#f87171;cursor:pointer;font-size:0.95rem;padding:2px 6px;border-radius:6px}
+.btn-remove:hover{background:#f8717122}
+.qa-pair textarea{margin-bottom:7px}
+.qa-pair textarea:last-child{margin-bottom:0}
+.qa-label{font-size:0.7rem;color:#6b7a99;margin-bottom:3px}
+.btn-add{width:100%;padding:9px;border-radius:10px;border:1px dashed #1f2d45;background:transparent;color:#6b7a99;font-size:0.83rem;cursor:pointer;transition:all 0.16s;margin-top:4px}
+.btn-add:hover{border-color:#6c8cff;color:#6c8cff;background:#6c8cff0a}
+.custom-timer-row{display:flex;align-items:center;gap:9px;margin-top:9px}
+.custom-timer-row input[type=number]{width:72px;background:#0d1526;border:1px solid #1f2d45;border-radius:8px;color:#e0e6f0;padding:6px 10px;font-size:0.85rem;outline:none;text-align:center}
+.custom-timer-row input[type=number]:focus{border-color:#6c8cff}
+.custom-timer-row label{font-size:0.81rem;color:#6b7a99}
+.btn-primary{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#6c8cff,#a78bfa);color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.btn-primary:hover{opacity:0.9}
+.err{color:#f87171;font-size:0.8rem;margin-top:2px}
+#loading{align-items:center;justify-content:center;gap:14px}
+.spinner{width:42px;height:42px;border:4px solid #1f2d45;border-top-color:#6c8cff;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:#6b7a99}
+#interview{max-width:660px;margin:0 auto;width:100%;gap:16px;justify-content:center}
+.progress-bar-wrap{background:#111827;border-radius:20px;height:5px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#6c8cff,#a78bfa);border-radius:20px;transition:width 0.5s}
+.q-meta{display:flex;justify-content:space-between;font-size:0.79rem;color:#6b7a99}
+.question-card{background:#111827;border:1px solid #1f2d45;border-radius:16px;padding:24px;text-align:center}
+.q-label-sm{font-size:0.7rem;color:#6c8cff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:9px}
+.q-text{font-size:1.08rem;line-height:1.65;color:#e0e6f0;font-weight:500}
+.ai-speaking{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:9px;font-size:0.77rem;color:#a78bfa}
+.ai-speaking .dot{width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:pulse 1s ease-in-out infinite}
+.ai-speaking .dot:nth-child(2){animation-delay:0.2s}
+.ai-speaking .dot:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+.timer-ring-wrap{display:flex;justify-content:center}
+.timer-ring{position:relative;width:74px;height:74px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring circle{fill:none;stroke-width:5}
+.timer-ring .bg{stroke:#1f2d45}
+.timer-ring .fg{stroke:#6c8cff;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.4s}
+.timer-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0.95rem;font-weight:700;color:#e0e6f0}
+.mic-area{display:flex;flex-direction:column;align-items:center;gap:12px}
+.mic-btn{width:72px;height:72px;border-radius:50%;border:2px solid #1f2d45;background:#111827;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s}
+.mic-btn svg{width:28px;height:28px;transition:all 0.2s}
+.mic-btn.listening{border-color:#6c8cff;background:#6c8cff18;animation:ripple 1.4s ease-out infinite}
+.mic-btn.paused{border-color:#fbbf24;background:#fbbf2418}
+.mic-btn.listening svg{stroke:#6c8cff}
+.mic-btn.paused svg{stroke:#fbbf24}
+@keyframes ripple{0%{box-shadow:0 0 0 0 #6c8cff44}100%{box-shadow:0 0 0 22px #6c8cff00}}
+.mic-label{font-size:0.78rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase}
+.mic-label.idle{color:#6b7a99}
+.mic-label.listening{color:#6c8cff}
+.mic-label.paused{color:#fbbf24}
+.transcript-box{background:#0d1526;border:1px solid #1f2d45;border-radius:10px;padding:12px 14px;font-size:0.87rem;color:#c0cce0;min-height:80px;width:100%;text-align:left;line-height:1.6;transition:border-color 0.2s;white-space:pre-wrap;word-break:break-word}
+.transcript-box.listening{border-color:#6c8cff66}
+.transcript-box.empty{color:#3a4a66;font-style:italic}
+.status-bar{font-size:0.75rem;padding:6px 10px;border-radius:8px;text-align:center;background:#0d1526;border:1px solid #1f2d45;color:#6b7a99}
+.status-bar.ok{border-color:#34d39944;color:#34d399;background:#34d39910}
+.status-bar.warn{border-color:#fbbf2444;color:#fbbf24;background:#fbbf2410}
+.status-bar.err{border-color:#f8717144;color:#f87171;background:#f8717110}
+.btn-submit{padding:11px 34px;border-radius:10px;border:none;background:linear-gradient(135deg,#6c8cff,#a78bfa);color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.btn-submit:disabled{opacity:0.35;cursor:not-allowed}
+#scoring{align-items:center;justify-content:center;gap:12px}
+#scoring p{color:#6b7a99}
+#results{max-width:780px;margin:0 auto;width:100%;gap:16px}
+.results-header{text-align:center;padding:4px 0}
+.results-header h2{font-size:1.4rem;font-weight:700}
+.overall-score{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.score-pill{background:#111827;border:1px solid #1f2d45;border-radius:12px;padding:11px 20px;text-align:center;min-width:105px}
+.score-pill .slabel{font-size:0.68rem;color:#6b7a99;text-transform:uppercase;letter-spacing:0.08em}
+.score-pill .val{font-size:1.45rem;font-weight:800;margin-top:2px}
+.val.good{color:#34d399}.val.mid{color:#fbbf24}.val.low{color:#f87171}
+.q-result{background:#111827;border:1px solid #1f2d45;border-radius:14px;padding:16px}
+.q-result h4{font-size:0.76rem;color:#6c8cff;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px}
+.q-result .q-txt{font-size:0.91rem;color:#c0cce0;margin-bottom:9px;font-style:italic}
+.score-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.score-tag{padding:4px 12px;border-radius:20px;font-size:0.74rem;font-weight:700}
+.score-tag.good{background:#34d39922;color:#34d399}.score-tag.mid{background:#fbbf2422;color:#fbbf24}.score-tag.low{background:#f8717122;color:#f87171}
+.feedback-txt{font-size:0.83rem;color:#8899bb;line-height:1.6}
+.your-ans{font-size:0.79rem;color:#6b7a99;margin-top:9px;border-top:1px solid #1f2d45;padding-top:9px}
+.your-ans span{color:#a0aec0}
+.results-actions{display:flex;gap:10px}
+.btn-restart{flex:1;padding:11px;border-radius:10px;border:1px solid #6c8cff;background:transparent;color:#6c8cff;font-size:0.9rem;font-weight:700;cursor:pointer}
+.btn-restart:hover{background:#6c8cff18}
+.btn-save{flex:1;padding:11px;border-radius:10px;border:none;background:#6c8cff22;color:#6c8cff;font-size:0.9rem;font-weight:700;cursor:pointer}
+.btn-save:hover{background:#6c8cff33}
+.btn-save:disabled{opacity:0.4;cursor:not-allowed}
+#history-screen{max-width:780px;margin:0 auto;width:100%;gap:16px}
+.history-header{display:flex;justify-content:space-between;align-items:center}
+.history-header h2{font-size:1.3rem;font-weight:700}
+.btn-clear-history{padding:7px 14px;border-radius:8px;border:1px solid #f87171;background:transparent;color:#f87171;font-size:0.78rem;cursor:pointer}
+.empty-history{text-align:center;color:#3a4a66;padding:60px 0;font-size:0.9rem}
+.history-item{background:#111827;border:1px solid #1f2d45;border-radius:14px;overflow:hidden;margin-bottom:10px}
+.history-item-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer}
+.history-item-header:hover{background:#1a2540}
+.history-item-meta{display:flex;flex-direction:column;gap:3px}
+.history-item-title{font-size:0.9rem;font-weight:600}
+.history-item-date{font-size:0.74rem;color:#6b7a99}
+.mini-score{font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:12px}
+.mini-score.good{background:#34d39920;color:#34d399}.mini-score.mid{background:#fbbf2420;color:#fbbf24}.mini-score.low{background:#f8717120;color:#f87171}
+.chevron{color:#6b7a99;font-size:0.85rem;transition:transform 0.2s;margin-left:8px}
+.chevron.open{transform:rotate(180deg)}
+.history-item-body{display:none;padding:0 16px 14px;border-top:1px solid #1f2d45}
+.history-item-body.open{display:block}
+.history-q{margin-top:12px}
+.history-q .hq-txt{font-size:0.86rem;color:#c0cce0;font-style:italic;margin-bottom:6px}
+.history-q .hq-scores{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.history-q .hq-feedback{font-size:0.8rem;color:#8899bb;line-height:1.55}
+.history-q .hq-ans{font-size:0.77rem;color:#6b7a99;margin-top:6px;padding-top:6px;border-top:1px solid #1f2d45}
+.history-q .hq-ans span{color:#a0aec0}
+.btn-delete-entry{padding:5px 12px;border-radius:8px;border:1px solid #f87171;background:transparent;color:#f87171;font-size:0.73rem;cursor:pointer;float:right;margin-top:8px}
+/* type fallback */
+.type-fallback{display:flex;flex-direction:column;gap:8px}
+.type-fallback textarea{min-height:90px}
+.type-fallback .hint{font-size:0.75rem;color:#6b7a99}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup" class="screen active">
+  <div class="logo"><h1>🎤 AI Mock Interview</h1><p>Practice. Get scored. Get hired.</p></div>
+  <div class="top-nav">
+    <button class="nav-btn active" onclick="showTab('setup')">Setup</button>
+    <button class="nav-btn" onclick="showTab('history-screen')">History <span class="badge" id="history-badge" style="display:none">0</span></button>
+  </div>
+  <div class="card">
+    <h3>Job Description</h3>
+    <textarea id="jd" rows="4" placeholder="Paste the job description here..."></textarea>
+  </div>
+  <div class="card">
+    <h3>Interview Questions</h3>
+    <div class="q-tab-row">
+      <button class="q-tab active" onclick="setQMode('generate',this)">✨ AI Generate</button>
+      <button class="q-tab" onclick="setQMode('custom',this)">📋 Custom Q&A</button>
+    </div>
+    <div id="pane-generate">
+      <p style="font-size:0.81rem;color:#6b7a99">AI will generate relevant questions from the JD.</p>
+      <textarea id="global-ideal" rows="3" placeholder="Optional: paste ideal answers to benchmark against..." style="margin-top:9px"></textarea>
+    </div>
+    <div id="pane-custom" style="display:none">
+      <div class="toggle-row" style="margin-bottom:12px">
+        <label class="toggle"><input type="checkbox" id="randomize-toggle"><span class="toggle-slider"></span></label>
+        <span class="toggle-label">🔀 Randomize question order</span>
+      </div>
+      <div class="qa-list" id="qa-list"></div>
+      <button class="btn-add" onclick="addQAPair()">+ Add Question</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="card">
+      <h3>Timer Per Question</h3>
+      <div class="chip-group" id="timer-chips">
+        <button class="chip selected" data-val="0" onclick="setTimer(this)">Off</button>
+        <button class="chip" data-val="0.5" onclick="setTimer(this)">30s</button>
+        <button class="chip" data-val="1" onclick="setTimer(this)">1 min</button>
+        <button class="chip" data-val="1.5" onclick="setTimer(this)">1.5 min</button>
+        <button class="chip" data-val="2" onclick="setTimer(this)">2 min</button>
+        <button class="chip" data-val="custom" onclick="setTimer(this)">Custom</button>
+      </div>
+      <div class="custom-timer-row" id="custom-timer-row" style="display:none">
+        <input type="number" id="custom-timer-val" min="0.5" max="60" step="0.5" placeholder="3" oninput="updateCustomTimer()">
+        <label>minutes</label>
+      </div>
+    </div>
+    <div class="card" id="qcount-card">
+      <h3>Number of Questions</h3>
+      <div class="chip-group">
+        <button class="chip" data-count="3" onclick="setQCount(this)">3</button>
+        <button class="chip selected" data-count="5" onclick="setQCount(this)">5</button>
+        <button class="chip" data-count="8" onclick="setQCount(this)">8</button>
+        <button class="chip" data-count="10" onclick="setQCount(this)">10</button>
+      </div>
+    </div>
+  </div>
+  <div id="setup-err" class="err" style="display:none"></div>
+  <button class="btn-primary" onclick="startInterview()">Start Interview →</button>
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="screen">
+  <div class="spinner"></div>
+  <p id="loading-msg">Generating your interview questions...</p>
+</div>
+
+<!-- INTERVIEW -->
+<div id="interview" class="screen">
+  <div class="q-meta">
+    <span id="q-counter">Question 1 of 5</span><span></span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="question-card">
+    <div class="q-label-sm">Interview Question</div>
+    <div class="q-text" id="q-text">Loading...</div>
+    <div class="ai-speaking" id="ai-speaking" style="display:none">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span>AI is speaking...</span>
+    </div>
+  </div>
+  <div class="timer-ring-wrap" id="timer-wrap" style="display:none">
+    <div class="timer-ring">
+      <svg width="74" height="74" viewBox="0 0 74 74">
+        <circle class="bg" cx="37" cy="37" r="32"/>
+        <circle class="fg" id="timer-circle" cx="37" cy="37" r="32" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-num" id="timer-num">60</div>
+    </div>
+  </div>
+  <div class="mic-area">
+    <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+      <svg id="mic-icon" viewBox="0 0 24 24" fill="none" stroke="#6b7a99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <span class="mic-label idle" id="mic-label">TAP TO SPEAK</span>
+  </div>
+  <div id="status-bar" class="status-bar">Waiting to start...</div>
+  <div id="transcript" class="transcript-box empty">Your answer will appear here as you speak...</div>
+  <!-- Type fallback -->
+  <div id="type-fallback" class="type-fallback" style="display:none">
+    <div class="hint">🖊 Speech not available — type your answer below:</div>
+    <textarea id="typed-answer" rows="4" placeholder="Type your answer here..." oninput="onTypeInput()"></textarea>
+  </div>
+  <button class="btn-submit" id="submit-btn" onclick="submitAnswer()" disabled>Submit Answer →</button>
+</div>
+
+<!-- SCORING -->
+<div id="scoring" class="screen">
+  <div class="spinner"></div>
+  <p>Analysing your answer...</p>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-header">
+    <h2>Interview Complete 🎉</h2>
+    <p style="color:#6b7a99;font-size:0.86rem;margin-top:4px">Here's how you performed</p>
+  </div>
+  <div class="overall-score" id="overall-scores"></div>
+  <div id="results-list"></div>
+  <div class="results-actions">
+    <button class="btn-save" id="save-btn" onclick="saveToHistory()">💾 Save to History</button>
+    <button class="btn-restart" onclick="restart()">↩ New Interview</button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="history-screen" class="screen">
+  <div class="top-nav">
+    <button class="nav-btn" onclick="showTab('setup')">Setup</button>
+    <button class="nav-btn active" onclick="showTab('history-screen')">History <span class="badge" id="history-badge2">0</span></button>
+  </div>
+  <div class="history-header">
+    <h2>Interview History</h2>
+    <button class="btn-clear-history" onclick="clearHistory()">Clear All</button>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<script>
+const API = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+const STORAGE_KEY = "mockinterview_v3";
+
+let state = {
+  jd:"", qMode:"generate", globalIdeal:"",
+  timer:0, qCount:5,
+  questions:[], idealAnswers:[],
+  currentQ:0, answers:[], scores:[],
+  timerInterval:null, timerLeft:0,
+  qaPairs:[], randomize:false,
+  currentResultSaved:false,
+  micState:"idle", // idle | listening | paused
+  recognition:null,
+  finalTranscript:"",
+  usingTypeFallback:false
+};
+
+let pId=0;
+
+window.onload = () => {
+  addQAPair();
+  loadHistoryBadge();
+  checkSpeechSupport();
+};
+
+function checkSpeechSupport() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    state.usingTypeFallback = true;
+    setStatus('Speech recognition not available — type mode enabled', 'warn');
+  }
+}
+
+function setStatus(msg, type='') {
+  const el = document.getElementById('status-bar');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status-bar' + (type ? ' '+type : '');
+}
+
+// ── TABS ──
+function showTab(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id==='history-screen') renderHistory();
+}
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── SETUP ──
+function setQMode(m,el){
+  state.qMode=m;
+  document.querySelectorAll('.q-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pane-generate').style.display=m==='generate'?'block':'none';
+  document.getElementById('pane-custom').style.display=m==='custom'?'block':'none';
+  document.getElementById('qcount-card').style.display=m==='generate'?'flex':'none';
+}
+function setTimer(el){
+  const v=el.dataset.val;
+  document.querySelectorAll('#timer-chips .chip').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  const row=document.getElementById('custom-timer-row');
+  if(v==='custom'){
+    row.style.display='flex';
+    state.timer=Math.round((parseFloat(document.getElementById('custom-timer-val').value)||1)*60);
+  } else {
+    row.style.display='none';
+    state.timer=Math.round(parseFloat(v)*60);
+  }
+}
+function updateCustomTimer(){
+  state.timer=Math.round((parseFloat(document.getElementById('custom-timer-val').value)||0)*60);
+}
+function setQCount(el){
+  state.qCount=parseInt(el.dataset.count);
+  el.closest('.chip-group').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function addQAPair(){const id=pId++;state.qaPairs.push({id,q:'',a:''});renderQAList();}
+function removeQAPair(id){state.qaPairs=state.qaPairs.filter(p=>p.id!==id);renderQAList();}
+function renderQAList(){
+  document.getElementById('qa-list').innerHTML=state.qaPairs.map((p,i)=>`
+    <div class="qa-pair">
+      <div class="qa-pair-header">
+        <span>Question ${i+1}</span>
+        ${state.qaPairs.length>1?`<button class="btn-remove" onclick="removeQAPair(${p.id})">✕</button>`:''}
+      </div>
+      <div class="qa-label">Question</div>
+      <textarea rows="2" placeholder="e.g. Tell me about yourself..." oninput="updatePair(${p.id},'q',this.value)">${p.q}</textarea>
+      <div class="qa-label">Ideal Answer <span style="color:#3a4a66;font-weight:400">(optional)</span></div>
+      <textarea rows="3" placeholder="Paste ideal answer to benchmark against..." oninput="updatePair(${p.id},'a',this.value)">${p.a}</textarea>
+    </div>`).join('');
+}
+function updatePair(id,field,val){const p=state.qaPairs.find(p=>p.id===id);if(p)p[field]=val;}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+// ── START ──
+async function startInterview(){
+  const jd=document.getElementById('jd').value.trim();
+  if(!jd){showErr("Please paste a job description.");return;}
+  state.jd=jd; state.answers=[]; state.scores=[]; state.currentQ=0; state.currentResultSaved=false;
+  state.randomize=document.getElementById('randomize-toggle').checked;
+  if(state.qMode==='custom'){
+    let valid=state.qaPairs.filter(p=>p.q.trim());
+    if(!valid.length){showErr("Please add at least one question.");return;}
+    if(state.randomize) valid=shuffle(valid);
+    state.questions=valid.map(p=>p.q.trim());
+    state.idealAnswers=valid.map(p=>p.a.trim());
+    show('interview'); loadQuestion();
+  } else {
+    state.globalIdeal=document.getElementById('global-ideal').value.trim();
+    show('loading'); await generateQuestions();
+  }
+}
+async function generateQuestions(){
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:1000,system:`Generate exactly ${state.qCount} interview questions from the job description. Return ONLY a JSON array of strings.`,messages:[{role:'user',content:`Job Description:\n${state.jd}`}]})});
+    const data=await res.json();
+    const txt=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    state.questions=JSON.parse(txt);
+    state.idealAnswers=state.questions.map(()=>state.globalIdeal);
+    show('interview'); loadQuestion();
+  }catch(e){show('setup');showErr('Failed to generate questions.');}
+}
+
+// ── QUESTION ──
+function loadQuestion(){
+  const q=state.questions[state.currentQ], total=state.questions.length;
+  document.getElementById('q-counter').textContent=`Question ${state.currentQ+1} of ${total}`;
+  document.getElementById('progress-fill').style.width=`${(state.currentQ/total)*100}%`;
+  document.getElementById('q-text').textContent=q;
+  // reset transcript
+  state.finalTranscript='';
+  const box=document.getElementById('transcript');
+  box.textContent='Your answer will appear here as you speak...';
+  box.className='transcript-box empty';
+  // reset typed fallback
+  document.getElementById('typed-answer').value='';
+  document.getElementById('type-fallback').style.display=state.usingTypeFallback?'flex':'none';
+  document.getElementById('submit-btn').disabled=true;
+  setMicUI('idle');
+  stopTimer();
+  if(state.recognition){try{state.recognition.abort();}catch(e){} state.recognition=null;}
+  speakQuestion(q);
+}
+
+function speakQuestion(text){
+  if(!window.speechSynthesis){afterSpeak();return;}
+  window.speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  utt.rate=0.92; utt.pitch=1;
+  document.getElementById('ai-speaking').style.display='flex';
+  utt.onend=()=>{document.getElementById('ai-speaking').style.display='none';afterSpeak();};
+  utt.onerror=()=>{document.getElementById('ai-speaking').style.display='none';afterSpeak();};
+  window.speechSynthesis.speak(utt);
+}
+function afterSpeak(){
+  if(state.timer>0) startTimer();
+  if(!state.usingTypeFallback) setStatus('Tap the mic to start speaking','');
+  else setStatus('Type your answer below','');
+}
+
+// ── MIC ──
+function setMicUI(s){
+  state.micState=s;
+  const btn=document.getElementById('mic-btn');
+  const lbl=document.getElementById('mic-label');
+  const icon=document.getElementById('mic-icon');
+  btn.className='mic-btn'+(s==='listening'?' listening':s==='paused'?' paused':'');
+  if(s==='listening'){lbl.textContent='TAP TO PAUSE';lbl.className='mic-label listening';icon.setAttribute('stroke','#6c8cff');}
+  else if(s==='paused'){lbl.textContent='PAUSED — TAP TO RESUME';lbl.className='mic-label paused';icon.setAttribute('stroke','#fbbf24');}
+  else{lbl.textContent='TAP TO SPEAK';lbl.className='mic-label idle';icon.setAttribute('stroke','#6b7a99');}
+}
+
+function toggleMic(){
+  if(state.usingTypeFallback) return;
+  if(state.micState==='idle') startListening();
+  else if(state.micState==='listening') pauseListening();
+  else if(state.micState==='paused') resumeListening();
+}
+
+function startListening(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    state.usingTypeFallback=true;
+    document.getElementById('type-fallback').style.display='flex';
+    setStatus('Speech not supported — type your answer below','warn');
+    return;
+  }
+  try{
+    const r=new SR();
+    r.continuous=true;
+    r.interimResults=true;
+    r.lang='en-US';
+    r.onstart=()=>{
+      setMicUI('listening');
+      setStatus('🎙 Listening... speak clearly','ok');
+    };
+    r.onresult=e=>{
+      let interim='';
+      let final=state.finalTranscript;
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal) final+=e.results[i][0].transcript+' ';
+        else interim+=e.results[i][0].transcript;
+      }
+      state.finalTranscript=final;
+      const display=(final+interim).trim();
+      const box=document.getElementById('transcript');
+      if(display){
+        // Show final in white, interim in dimmer colour
+        box.innerHTML=`<span>${escHtml(final)}</span><span style="color:#6c8cff88">${escHtml(interim)}</span>`;
+        box.className='transcript-box listening';
+        document.getElementById('submit-btn').disabled=false;
+      }
+    };
+    r.onerror=e=>{
+      console.warn('SR error:',e.error);
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+        setStatus('❌ Mic blocked — please allow microphone in browser settings','err');
+        setMicUI('idle');
+        // show type fallback
+        state.usingTypeFallback=true;
+        document.getElementById('type-fallback').style.display='flex';
+      } else if(e.error==='network'){
+        setStatus('⚠️ Network error with speech service — try again','warn');
+        setMicUI('idle');
+      } else if(e.error!=='aborted'&&e.error!=='no-speech'){
+        setStatus(`SR error: ${e.error}`,'warn');
+      }
+    };
+    r.onend=()=>{
+      // Only auto-restart if still supposed to be listening
+      if(state.micState==='listening'){
+        try{r.start();}catch(err){}
+      }
+    };
+    r.start();
+    state.recognition=r;
+  }catch(e){
+    setStatus('Could not start speech recognition: '+e.message,'err');
+    state.usingTypeFallback=true;
+    document.getElementById('type-fallback').style.display='flex';
+  }
+}
+
+function pauseListening(){
+  if(state.recognition){
+    state.micState='paused'; // set before abort so onend doesn't restart
+    try{state.recognition.abort();}catch(e){}
+  }
+  setMicUI('paused');
+  setStatus('⏸ Paused. Tap mic to resume.','');
+}
+
+function resumeListening(){
+  setMicUI('listening');
+  // restart recognition keeping existing transcript
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();
+  r.continuous=true; r.interimResults=true; r.lang='en-US';
+  r.onstart=()=>{
+    setMicUI('listening');
+    setStatus('🎙 Listening... speak clearly','ok');
+  };
+  r.onresult=e=>{
+    let interim='', final=state.finalTranscript;
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    state.finalTranscript=final;
+    const display=(final+interim).trim();
+    const box=document.getElementById('transcript');
+    if(display){
+      box.innerHTML=`<span>${escHtml(final)}</span><span style="color:#6c8cff88">${escHtml(interim)}</span>`;
+      box.className='transcript-box listening';
+      document.getElementById('submit-btn').disabled=false;
+    }
+  };
+  r.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      setStatus('❌ Mic blocked','err'); setMicUI('idle');
+    }
+  };
+  r.onend=()=>{if(state.micState==='listening'){try{r.start();}catch(e){}}}
+  r.start();
+  state.recognition=r;
+}
+
+function onTypeInput(){
+  const val=document.getElementById('typed-answer').value.trim();
+  document.getElementById('submit-btn').disabled=!val;
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── TIMER ──
+function startTimer(){
+  const total=state.timer; state.timerLeft=total;
+  document.getElementById('timer-wrap').style.display='flex';
+  updateTimerUI(total,total);
+  state.timerInterval=setInterval(()=>{
+    state.timerLeft--;
+    updateTimerUI(state.timerLeft,total);
+    if(state.timerLeft<=0){clearInterval(state.timerInterval);submitAnswer();}
+  },1000);
+}
+function updateTimerUI(left,total){
+  const circ=document.getElementById('timer-circle');
+  const r=32,c=2*Math.PI*r;
+  circ.style.strokeDasharray=c;
+  circ.style.strokeDashoffset=c*(1-left/total);
+  circ.style.stroke=left<=10?'#f87171':left<=20?'#fbbf24':'#6c8cff';
+  document.getElementById('timer-num').textContent=left>=60?`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`:left+'s';
+}
+function stopTimer(){clearInterval(state.timerInterval);document.getElementById('timer-wrap').style.display='none';}
+
+// ── SUBMIT ──
+async function submitAnswer(){
+  stopTimer();
+  // Stop recognition cleanly
+  if(state.recognition){
+    state.micState='idle';
+    try{state.recognition.abort();}catch(e){}
+    state.recognition=null;
+  }
+  setMicUI('idle');
+
+  let ans;
+  if(state.usingTypeFallback){
+    ans=document.getElementById('typed-answer').value.trim()||'[No answer given]';
+  } else {
+    ans=state.finalTranscript.trim()||'[No answer given]';
+  }
+  state.answers.push(ans);
+
+  // Show final transcript
+  const box=document.getElementById('transcript');
+  box.textContent=ans;
+  box.className='transcript-box';
+
+  show('scoring');
+
+  const q=state.questions[state.currentQ];
+  const ideal=state.idealAnswers[state.currentQ];
+  const idealCtx=ideal?`\nIdeal answer:\n${ideal}`:'';
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:800,system:`You are a strict but fair interview coach. Score the candidate's answer. Return ONLY valid JSON, no markdown: {"clarity":85,"confidence":70,"relevance":90,"feedback":"2-3 sentence feedback"}. Scores are integers 0-100.`,messages:[{role:'user',content:`Job Description:\n${state.jd}${idealCtx}\n\nQuestion: ${q}\n\nCandidate's answer: ${ans}`}]})});
+    const data=await res.json();
+    const txt=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    state.scores.push(JSON.parse(txt));
+  }catch(e){state.scores.push({clarity:0,confidence:0,relevance:0,feedback:'Could not score this answer.'});}
+
+  state.currentQ++;
+  if(state.currentQ<state.questions.length){show('interview');loadQuestion();}
+  else showResults();
+}
+
+// ── RESULTS ──
+const g=v=>v>=75?'good':v>=50?'mid':'low';
+function showResults(){
+  const avg=k=>Math.round(state.scores.reduce((s,sc)=>s+(sc[k]||0),0)/state.scores.length);
+  const cl=avg('clarity'),co=avg('confidence'),re=avg('relevance'),ov=Math.round((cl+co+re)/3);
+  document.getElementById('overall-scores').innerHTML=[['Overall',ov],['Clarity',cl],['Confidence',co],['Relevance',re]].map(([l,v])=>`<div class="score-pill"><div class="slabel">${l}</div><div class="val ${g(v)}">${v}<span style="font-size:0.62rem;font-weight:400">/100</span></div></div>`).join('');
+  document.getElementById('results-list').innerHTML=state.questions.map((q,i)=>{const s=state.scores[i]||{};return `<div class="q-result"><h4>Question ${i+1}</h4><div class="q-txt">${q}</div><div class="score-row">${[['Clarity',s.clarity],['Confidence',s.confidence],['Relevance',s.relevance]].map(([l,v])=>`<span class="score-tag ${g(v||0)}">${l}: ${v||0}</span>`).join('')}</div><div class="feedback-txt">${s.feedback||''}</div><div class="your-ans">Your answer: <span>${state.answers[i]||'[none]'}</span></div></div>`;}).join('');
+  document.getElementById('save-btn').disabled=false;
+  state.currentResultSaved=false;
+  show('results');
+}
+
+// ── HISTORY ──
+function getHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return [];}}
+function saveHistory(h){localStorage.setItem(STORAGE_KEY,JSON.stringify(h));loadHistoryBadge();}
+function loadHistoryBadge(){
+  const c=getHistory().length;
+  ['history-badge','history-badge2'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.textContent=c;el.style.display=c>0?'inline-block':'none';});
+}
+function saveToHistory(){
+  if(state.currentResultSaved)return;
+  const avg=k=>Math.round(state.scores.reduce((s,sc)=>s+(sc[k]||0),0)/state.scores.length);
+  const cl=avg('clarity'),co=avg('confidence'),re=avg('relevance'),ov=Math.round((cl+co+re)/3);
+  const h=getHistory();
+  h.unshift({id:Date.now(),date:new Date().toLocaleString(),overall:ov,clarity:cl,confidence:co,relevance:re,questions:state.questions,answers:state.answers,scores:state.scores});
+  saveHistory(h); state.currentResultSaved=true;
+  const btn=document.getElementById('save-btn');btn.textContent='✓ Saved!';btn.disabled=true;
+}
+function clearHistory(){if(!confirm('Clear all history?'))return;localStorage.removeItem(STORAGE_KEY);loadHistoryBadge();renderHistory();}
+function deleteEntry(id){saveHistory(getHistory().filter(e=>e.id!==id));renderHistory();}
+function toggleHistoryItem(id){document.getElementById('hbody-'+id).classList.toggle('open');document.getElementById('hchev-'+id).classList.toggle('open');}
+function renderHistory(){
+  const h=getHistory();loadHistoryBadge();
+  const list=document.getElementById('history-list');
+  if(!h.length){list.innerHTML='<div class="empty-history">No interviews saved yet.<br>Complete an interview and tap "Save to History".</div>';return;}
+  list.innerHTML=h.map(e=>`<div class="history-item"><div class="history-item-header" onclick="toggleHistoryItem(${e.id})"><div class="history-item-meta"><div class="history-item-title">Interview — ${e.date}</div><div class="history-item-date">${e.questions.length} questions</div></div><div style="display:flex;align-items:center;gap:8px"><span class="mini-score ${g(e.overall)}">Overall: ${e.overall}</span><span class="chevron" id="hchev-${e.id}">▼</span></div></div><div class="history-item-body" id="hbody-${e.id}"><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px">${[['Clarity',e.clarity],['Confidence',e.confidence],['Relevance',e.relevance]].map(([l,v])=>`<span class="mini-score ${g(v)}">${l}: ${v}</span>`).join('')}</div>${e.questions.map((q,i)=>{const s=e.scores[i]||{};return `<div class="history-q"><div class="hq-txt">Q${i+1}: ${q}</div><div class="hq-scores">${[['Clarity',s.clarity],['Confidence',s.confidence],['Relevance',s.relevance]].map(([l,v])=>`<span class="score-tag ${g(v||0)}">${l}: ${v||0}</span>`).join('')}</div><div class="hq-feedback">${s.feedback||''}</div><div class="hq-ans">Your answer: <span>${e.answers[i]||'[none]'}</span></div></div>`;}).join('<hr style="border:none;border-top:1px solid #1f2d45;margin:10px 0">')}<button class="btn-delete-entry" onclick="deleteEntry(${e.id})">🗑 Delete</button></div></div>`).join('');
+}
+
+function showErr(msg){const el=document.getElementById('setup-err');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function restart(){
+  state.answers=[];state.scores=[];state.currentQ=0;state.finalTranscript='';state.usingTypeFallback=false;
+  if(state.recognition){try{state.recognition.abort();}catch(e){} state.recognition=null;}
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  show('setup');
+}
+</script>
+</body>
+</html>
